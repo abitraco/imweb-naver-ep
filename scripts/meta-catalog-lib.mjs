@@ -33,6 +33,28 @@ export const META_CATALOG_COLUMNS = [
   "custom_label_4",
 ];
 
+export const GOOGLE_MERCHANT_COLUMNS = [
+  "id",
+  "title",
+  "description",
+  "link",
+  "image_link",
+  "additional_image_link",
+  "availability",
+  "price",
+  "condition",
+  "brand",
+  "identifier_exists",
+  "mpn",
+  "google_product_category",
+  "product_type",
+  "custom_label_0",
+  "custom_label_1",
+  "custom_label_2",
+  "custom_label_3",
+  "custom_label_4",
+];
+
 const BLOCKED_PATTERNS = [
   /\bcbd\b/i,
   /\bthc\b/i,
@@ -161,6 +183,34 @@ export function buildMetaCatalogRecord(product, category) {
   };
 }
 
+export function buildGoogleMerchantRecord(product, category) {
+  const metaRecord = buildMetaCatalogRecord(product, category);
+  if (!metaRecord) return null;
+
+  return {
+    id: metaRecord.id,
+    title: truncate(metaRecord.title, 150),
+    description: metaRecord.description,
+    link: metaRecord.link,
+    image_link: metaRecord.image_link,
+    additional_image_link: metaRecord.additional_image_link,
+    availability: metaRecord.availability === "in stock" ? "in_stock" : "out_of_stock",
+    price: metaRecord.price,
+    condition: "new",
+    brand: metaRecord.brand,
+    identifier_exists: "no",
+    mpn: "",
+    google_product_category: metaRecord.google_product_category,
+    product_type: metaRecord.product_type,
+    custom_label_0: metaRecord.custom_label_0,
+    custom_label_1: metaRecord.custom_label_1,
+    custom_label_2: metaRecord.custom_label_2,
+    custom_label_3: metaRecord.custom_label_3,
+    custom_label_4: metaRecord.custom_label_4,
+  };
+}
+
+
 export function productSortKey(product) {
   const addTime = typeof product.addTime === "string" ? Date.parse(product.addTime) : Number.NaN;
   if (Number.isFinite(addTime)) return addTime;
@@ -174,6 +224,14 @@ export function rowsToTsv(rows) {
   const lines = [META_CATALOG_COLUMNS.join("\t")];
   for (const row of rows) {
     lines.push(META_CATALOG_COLUMNS.map((column) => clean(row[column])).join("\t"));
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+export function googleRowsToTsv(rows) {
+  const lines = [GOOGLE_MERCHANT_COLUMNS.join("\t")];
+  for (const row of rows) {
+    lines.push(GOOGLE_MERCHANT_COLUMNS.map((column) => clean(row[column])).join("\t"));
   }
   return `${lines.join("\n")}\n`;
 }
