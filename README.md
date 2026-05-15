@@ -11,7 +11,8 @@ node scripts/generate-meta-catalog.mjs
 ```
 
 The local imweb scheduler (`/Users/chance/DEV/imweb/sync-scheduler.sh`) regenerates
-and publishes this feed every 12 hours when the generated TSV changes.
+and publishes the Naver, Meta, and Google public feed files together every 6
+hours when any generated file changes.
 
 Outputs:
 
