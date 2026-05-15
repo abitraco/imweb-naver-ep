@@ -10,6 +10,9 @@ Generate the Meta catalog feed from the local imweb admin API:
 node scripts/generate-meta-catalog.mjs
 ```
 
+The local imweb scheduler (`/Users/chance/DEV/imweb/sync-scheduler.sh`) regenerates
+and publishes this feed every 12 hours when the generated TSV changes.
+
 Outputs:
 
 - `meta-catalog.tsv` — upload this to Meta Commerce Manager as the scheduled data feed.
