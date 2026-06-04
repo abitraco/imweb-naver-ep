@@ -6,8 +6,10 @@ import path from "node:path";
 import {
   IHERB_CATEGORIES,
   buildGoogleMerchantRecord,
+  fetchJson,
   googleRowsToTsv,
   productSortKey,
+  sleep,
 } from "./meta-catalog-lib.mjs";
 
 const DEFAULT_ADMIN_URL = "http://127.0.0.1:3030";
@@ -49,19 +51,9 @@ Options:
   return options;
 }
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function fetchJson(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`GET ${url} HTTP ${response.status}`);
-  }
-  const json = await response.json();
-  if (json.statusCode && json.statusCode !== 200) {
-    throw new Error(`GET ${url} statusCode=${json.statusCode}`);
-  }
-  return json;
-}
+const logRetry = ({ url, attempt, reason }) => {
+  console.error(`[google-merchant] retry ${reason} (attempt ${attempt + 1})`);
+};
 
 async function fetchProductsForCategory(adminUrl, category) {
   const firstUrl = new URL(`${adminUrl}/api/products`);
@@ -69,7 +61,7 @@ async function fetchProductsForCategory(adminUrl, category) {
   firstUrl.searchParams.set("limit", String(PAGE_SIZE));
   firstUrl.searchParams.set("categoryCode", category.code);
 
-  const first = await fetchJson(firstUrl);
+  const first = await fetchJson(firstUrl, { onRetry: logRetry });
   const firstData = first.data || {};
   const totalCount = Number(firstData.totalCount || 0);
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
@@ -81,7 +73,7 @@ async function fetchProductsForCategory(adminUrl, category) {
     url.searchParams.set("limit", String(PAGE_SIZE));
     url.searchParams.set("categoryCode", category.code);
 
-    const json = await fetchJson(url);
+    const json = await fetchJson(url, { onRetry: logRetry });
     products.push(...(json.data?.list || []));
     await sleep(REQUEST_DELAY_MS);
   }

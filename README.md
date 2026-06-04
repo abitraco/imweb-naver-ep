@@ -2,6 +2,39 @@
 
 Public feed artifacts for onejikgu.co.kr.
 
+## Naver Shopping EP
+
+Generate the Naver Shopping EP feed from the local imweb admin API:
+
+```bash
+node scripts/generate-naver-ep.mjs
+```
+
+Outputs:
+
+- `ep.txt` — the tab-delimited Naver Shopping EP feed.
+- `ep-excluded.txt` — blocked-keyword review list, not for upload.
+
+The Naver EP is a **sale-only** feed: sold-out products are dropped rather than
+carried as out of stock. It uses stable `iherb-*` IDs from `customProdCode`,
+sets `condition=신상품` / `import_flag=Y` / `origin=미국`, charges a flat
+`6000` KRW shipping fee below `40000` KRW (free above), and builds `search_tag`
+as `브랜드,iHerb,아이허브,해외직구,카테고리,CATE코드`. Compliance-blocked
+products (CBD/THC/DHEA/성기능 등) are routed to `ep-excluded.txt` unless
+`--include-blocked` is passed.
+
+```text
+https://abitraco.github.io/imweb-naver-ep/ep.txt
+```
+
+### Resilient admin fetches
+
+All three generators share a `fetchJson` helper (`scripts/meta-catalog-lib.mjs`)
+that retries transient admin API failures — HTTP `408/425/429/500/502/503/504`,
+JSON-body `statusCode` faults, and network errors — with exponential backoff
+before failing. This prevents a single flaky `/api/products` page (the HTTP 500
+that previously aborted Naver EP generation) from killing the whole run.
+
 ## Meta iHerb Catalog
 
 Generate the Meta catalog feed from the local imweb admin API:

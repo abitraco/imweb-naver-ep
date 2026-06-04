@@ -5,25 +5,25 @@ import path from "node:path";
 
 import {
   IHERB_CATEGORIES,
-  buildMetaCatalogRecord,
+  buildNaverEpRecord,
   fetchJson,
+  naverRowsToTsv,
   productSortKey,
-  rowsToTsv,
   sleep,
 } from "./meta-catalog-lib.mjs";
 
 const DEFAULT_ADMIN_URL = "http://127.0.0.1:3030";
-const DEFAULT_OUTPUT = path.resolve(process.cwd(), "meta-catalog.tsv");
-const DEFAULT_EXCLUDED_OUTPUT = path.resolve(process.cwd(), "meta-catalog-excluded.tsv");
+const DEFAULT_OUTPUT = path.resolve(process.cwd(), "ep.txt");
+const DEFAULT_EXCLUDED_OUTPUT = path.resolve(process.cwd(), "ep-excluded.txt");
 const PAGE_SIZE = 100;
 const REQUEST_DELAY_MS = 150;
 
 function parseArgs(argv) {
   const options = {
     adminUrl: process.env.IMWEB_ADMIN_URL || DEFAULT_ADMIN_URL,
-    output: process.env.META_CATALOG_OUTPUT || DEFAULT_OUTPUT,
-    excludedOutput: process.env.META_CATALOG_EXCLUDED_OUTPUT || DEFAULT_EXCLUDED_OUTPUT,
-    includeBlocked: process.env.META_CATALOG_INCLUDE_BLOCKED === "1",
+    output: process.env.NAVER_EP_OUTPUT || DEFAULT_OUTPUT,
+    excludedOutput: process.env.NAVER_EP_EXCLUDED_OUTPUT || DEFAULT_EXCLUDED_OUTPUT,
+    includeBlocked: process.env.NAVER_EP_INCLUDE_BLOCKED === "1",
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -33,13 +33,13 @@ function parseArgs(argv) {
     else if (arg === "--excluded-output") options.excludedOutput = argv[++i];
     else if (arg === "--include-blocked") options.includeBlocked = true;
     else if (arg === "--help") {
-      console.log(`Usage: node scripts/generate-meta-catalog.mjs [options]
+      console.log(`Usage: node scripts/generate-naver-ep.mjs [options]
 
 Options:
   --admin-url <url>          Local imweb admin URL. Default: ${DEFAULT_ADMIN_URL}
-  --output <path>            Meta catalog TSV output. Default: meta-catalog.tsv
-  --excluded-output <path>   Blocked review TSV output. Default: meta-catalog-excluded.tsv
-  --include-blocked          Include compliance=blocked rows in main catalog
+  --output <path>            Naver EP output. Default: ep.txt
+  --excluded-output <path>   Blocked review output. Default: ep-excluded.txt
+  --include-blocked          Include compliance=blocked rows in main EP
 `);
       process.exit(0);
     } else {
@@ -52,7 +52,7 @@ Options:
 }
 
 const logRetry = ({ url, attempt, reason }) => {
-  console.error(`[meta-catalog] retry ${reason} (attempt ${attempt + 1})`);
+  console.error(`[naver-ep] retry ${reason} (attempt ${attempt + 1})`);
 };
 
 async function fetchProductsForCategory(adminUrl, category) {
@@ -97,7 +97,7 @@ async function main() {
     skippedInvalid: 0,
     duplicateSkipped: 0,
     byCategory: {},
-    byAvailability: {},
+    byShipping: {},
     byCompliance: {},
   };
 
@@ -110,7 +110,7 @@ async function main() {
 
     for (const product of products) {
       summary.scanned += 1;
-      const record = buildMetaCatalogRecord(product, category);
+      const record = buildNaverEpRecord(product, category);
       if (!record) {
         skippedInvalid += 1;
         summary.skippedInvalid += 1;
@@ -124,7 +124,7 @@ async function main() {
       seen.add(record.id);
 
       const wrapped = { record, sortKey: productSortKey(product) };
-      if (record.custom_label_4 === "blocked" && !options.includeBlocked) {
+      if (record.compliance === "blocked" && !options.includeBlocked) {
         categoryExcluded.push(wrapped);
         continue;
       }
@@ -145,21 +145,21 @@ async function main() {
       duplicateSkipped,
     };
     console.error(
-      `[meta-catalog] ${category.name}(${category.code}) source=${totalCount} included=${categoryRecords.length} excluded=${categoryExcluded.length} invalid=${skippedInvalid} duplicate=${duplicateSkipped}`
+      `[naver-ep] ${category.name}(${category.code}) source=${totalCount} included=${categoryRecords.length} excluded=${categoryExcluded.length} invalid=${skippedInvalid} duplicate=${duplicateSkipped}`
     );
   }
 
   for (const row of rows) {
-    summary.byAvailability[row.availability] = (summary.byAvailability[row.availability] || 0) + 1;
-    summary.byCompliance[row.custom_label_4] = (summary.byCompliance[row.custom_label_4] || 0) + 1;
+    summary.byShipping[row.shipping] = (summary.byShipping[row.shipping] || 0) + 1;
+    summary.byCompliance[row.compliance] = (summary.byCompliance[row.compliance] || 0) + 1;
   }
 
   summary.included = rows.length;
   summary.excluded = excludedRows.length;
 
   await mkdir(path.dirname(options.output), { recursive: true });
-  await writeFile(options.output, rowsToTsv(rows), "utf8");
-  await writeFile(options.excludedOutput, rowsToTsv(excludedRows), "utf8");
+  await writeFile(options.output, naverRowsToTsv(rows), "utf8");
+  await writeFile(options.excludedOutput, naverRowsToTsv(excludedRows), "utf8");
 
   console.log(JSON.stringify(summary, null, 2));
 }
