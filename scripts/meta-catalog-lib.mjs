@@ -65,6 +65,8 @@ const BLOCKED_PATTERNS = [
   /\bkratom\b/i,
   /\bephedra\b/i,
   /성기능|발기\s*부전|발기력|발기\s*개선|최음/i,
+  // 생리대 형태 위생용품 (2026-06-15 Naver 적발 동일 정책 — 기타인증·고지의무 위반)
+  /생리대|탐폰|tampon|팬티\s*라이너|panty\s*liner|날개형|산모용\s*패드|요실금/i,
 ];
 
 const SENSITIVE_PATTERNS = [

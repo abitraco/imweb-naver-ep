@@ -142,6 +142,18 @@ test("classifyCompliance blocks high-risk substances and labels softer health cl
   assert.equal(classifyCompliance("실리콘 젖꼭지 치발기 보유"), "safe");
 });
 
+test("classifyCompliance blocks 생리대 형태 위생용품 (탐폰·날개형·라이너 포함)", () => {
+  assert.equal(classifyCompliance("Always 날개형 인피니티 플렉스 폼 레귤러 18개 Always"), "blocked");
+  assert.equal(classifyCompliance("Organyc 유기농 탐폰 콤팩트 슈퍼 탐폰 16개입 Organyc"), "blocked");
+  assert.equal(classifyCompliance("Rael 유기농 면 커버 생리대 S M 5개 Rael"), "blocked");
+  assert.equal(classifyCompliance("Rael 유기농 순면 커버 팬티 라이너 레귤러 20개입 Rael"), "blocked");
+  assert.equal(classifyCompliance("Here We Flo 산모용 패드 울트라 헤비 10개입 Here We Flo"), "blocked");
+  assert.equal(classifyCompliance("Rael 유기농 순면 커버 라이너 요실금용 레귤러 48개 Rael"), "blocked");
+  // false-positive guards: skincare 패드/오버나이트, 아이라이너 must stay non-blocked
+  assert.equal(classifyCompliance("Round Lab 1025 Dokdo Pad 70매 120g Round Lab"), "safe");
+  assert.equal(classifyCompliance("CosRx 프로폴리스 허니 오버나이트 뷰티 마스크 60ml CosRx"), "safe");
+});
+
 test("rowsToTsv writes stable columns and strips TSV-hostile characters", () => {
   const rows = [
     Object.fromEntries(META_CATALOG_COLUMNS.map((column) => [column, ""])) ,
