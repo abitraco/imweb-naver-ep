@@ -55,6 +55,13 @@ export const GOOGLE_MERCHANT_COLUMNS = [
   "custom_label_4",
 ];
 
+// Exact product IDs blocked across Meta/Google feeds (Naver 적발 동일 정책).
+// Use for ingredient-specific 취급 불가 적발 that no title keyword can generalize.
+const BLOCKED_IDS = new Set([
+  // 2026-06-26 Naver 적발 — 취급 불가 (불법 및 온라인판매금지)
+  "iherb-135079", // [iHerb]BrainMD 에브리데이 스트레스 릴리프 베지 캡슐 120정
+]);
+
 const BLOCKED_PATTERNS = [
   /\bcbd\b/i,
   /\bthc\b/i,
@@ -160,7 +167,9 @@ export function buildMetaCatalogRecord(product, category) {
   }
 
   const brand = truncate(product.brand || "iHerb", 100) || "iHerb";
-  const compliance = classifyCompliance(`${title} ${brand} ${product.maker || ""}`);
+  const compliance = BLOCKED_IDS.has(id)
+    ? "blocked"
+    : classifyCompliance(`${title} ${brand} ${product.maker || ""}`);
   const availability = clean(product.prodStatus).toLowerCase() === "sale" ? "in stock" : "out of stock";
 
   return {

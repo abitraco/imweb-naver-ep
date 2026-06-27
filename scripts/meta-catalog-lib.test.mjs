@@ -154,6 +154,37 @@ test("classifyCompliance blocks 생리대 형태 위생용품 (탐폰·날개형
   assert.equal(classifyCompliance("CosRx 프로폴리스 허니 오버나이트 뷰티 마스크 60ml CosRx"), "safe");
 });
 
+test("buildMetaCatalogRecord blocks exact 적발 IDs (취급 불가) while siblings stay safe", () => {
+  const base = {
+    prodNo: 86497,
+    price: 69470,
+    prodStatus: "sale",
+    productImages: ["https://cdn.example.com/main.jpg"],
+    brand: "BrainMD",
+    maker: "BrainMD",
+  };
+  // 2026-06-26 적발 — title carries no generalizable keyword, blocked by exact id
+  const blocked = buildMetaCatalogRecord(
+    { ...base, customProdCode: "iherb-135079", name: "[iHerb]BrainMD 에브리데이 스트레스 릴리프 베지 캡슐 120정" },
+    vitaminCategory
+  );
+  assert.equal(blocked.custom_label_4, "blocked");
+  // Google feed derives compliance from Meta record → also blocked
+  assert.equal(
+    buildGoogleMerchantRecord(
+      { ...base, customProdCode: "iherb-135079", name: "[iHerb]BrainMD 에브리데이 스트레스 릴리프 베지 캡슐 120정" },
+      vitaminCategory
+    ).custom_label_4,
+    "blocked"
+  );
+  // false-positive guard: other BrainMD 스트레스 릴리프-adjacent SKUs are not ID-blocked
+  const sibling = buildMetaCatalogRecord(
+    { ...base, customProdCode: "iherb-135069", name: "[iHerb]BrainMD 어텐션 지원 베지 캡슐 90정" },
+    vitaminCategory
+  );
+  assert.equal(sibling.custom_label_4, "safe");
+});
+
 test("rowsToTsv writes stable columns and strips TSV-hostile characters", () => {
   const rows = [
     Object.fromEntries(META_CATALOG_COLUMNS.map((column) => [column, ""])) ,
