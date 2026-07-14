@@ -60,6 +60,8 @@ export const GOOGLE_MERCHANT_COLUMNS = [
 const BLOCKED_IDS = new Set([
   // 2026-06-26 Naver 적발 — 취급 불가 (불법 및 온라인판매금지)
   "iherb-135079", // [iHerb]BrainMD 에브리데이 스트레스 릴리프 베지 캡슐 120정
+  // 2026-07-13 Naver 적발 — 생리대 형태 위생용품 (기타인증·고지의무 위반). 제목이 "라이너"라 팬티라이너 패턴 미포착 → ID 차단.
+  "iherb-78693", // Always 데일리 프레시 라이너 얇은 레귤러 무향 120개입
 ]);
 
 const BLOCKED_PATTERNS = [
