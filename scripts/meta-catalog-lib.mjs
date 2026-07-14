@@ -62,6 +62,12 @@ const BLOCKED_IDS = new Set([
   "iherb-135079", // [iHerb]BrainMD 에브리데이 스트레스 릴리프 베지 캡슐 120정
   // 2026-07-13 Naver 적발 — 생리대 형태 위생용품 (기타인증·고지의무 위반). 제목이 "라이너"라 팬티라이너 패턴 미포착 → ID 차단.
   "iherb-78693", // Always 데일리 프레시 라이너 얇은 레귤러 무향 120개입
+  // 2026-07-13 동일 클래스 선제 차단 — "라이너" 위생용품 (코스메틱 오탐 회피 위해 ID 차단)
+  "iherb-149739", // Here We Flo 패드 데일리 라이너 체험 팩
+  "iherb-154107", // The Honey Pot 유기농 롱 라이너 30개입
+  "iherb-109083", // Rael 순면 커버 라이너 레귤러 48개
+  "iherb-106400", // The Honey Pot 면 라이너 날개 포함 유기농
+  "iherb-98323", // Cottons 면 커버시트 롱 라이너 32개
 ]);
 
 const BLOCKED_PATTERNS = [
