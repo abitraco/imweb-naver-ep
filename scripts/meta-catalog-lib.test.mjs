@@ -154,6 +154,15 @@ test("classifyCompliance blocks 생리대 형태 위생용품 (탐폰·날개형
   assert.equal(classifyCompliance("CosRx 프로폴리스 허니 오버나이트 뷰티 마스크 60ml CosRx"), "safe");
 });
 
+test("classifyCompliance blocks military rations (2026-09-27 MRE import ban) without hydration false positives", () => {
+  for (const title of ["미군 MRE (멕시칸 스타일 치킨 스튜)", "XMRE 1300XT 전투식량", "Military Rations Meal Kit", "엠알이 비프", "[iHerb]Redcon1 MRE 천연 식품 단백질"]) {
+    assert.equal(classifyCompliance(title), "blocked", title);
+  }
+  for (const title of ["[iHerb]Nuun 스포츠 하이드레이션 전해질", "퓨어 인캡슐레이션스 마그네슘", "셀러브레이션 허벌스 티백"]) {
+    assert.notEqual(classifyCompliance(title), "blocked", title);
+  }
+});
+
 test("buildMetaCatalogRecord blocks exact 적발 IDs (취급 불가) while siblings stay safe", () => {
   const base = {
     prodNo: 86497,

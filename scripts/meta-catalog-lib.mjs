@@ -68,6 +68,13 @@ const BLOCKED_IDS = new Set([
   "iherb-109083", // Rael 순면 커버 라이너 레귤러 48개
   "iherb-106400", // The Honey Pot 면 라이너 날개 포함 유기농
   "iherb-98323", // Cottons 면 커버시트 롱 라이너 32개
+  // 2026-09-27 군용 전투식량(MRE) 반입금지 — 제목에 MRE 키워드가 없는 삭제 품목
+  "B007HQV1NA", // KJ 폴트리 코셔 즉석 삼계탕
+  "B0DY28N6VZ", // 퍼스트스트라이크 에너지바 애플시나몬 6개입
+  "B0DY31YYKC", // 퍼스트스트라이크 에너지바 애플시나몬 12개입
+  "B0DY2TCQKZ", // 퍼스트스트라이크 에너지바 크랜라즈베리 6개입
+  "B0CZYYQ7Y1", // 퍼스트스트라이크 미니 에너지바 모카 카페인
+  "B0DY35GTKD", // 퍼스트스트라이크 에너지바 크랜라즈베리
 ]);
 
 const BLOCKED_PATTERNS = [
@@ -82,6 +89,8 @@ const BLOCKED_PATTERNS = [
   /성기능|발기\s*부전|발기력|발기\s*개선|최음/i,
   // 생리대 형태 위생용품 (2026-06-15 Naver 적발 동일 정책 — 기타인증·고지의무 위반)
   /생리대|탐폰|tampon|팬티\s*라이너|panty\s*liner|날개형|산모용\s*패드|요실금/i,
+  // 군용 전투식량(MRE) 반입금지 (2026-09-27, Naver EP blocklist.ts 와 동일)
+  /\bX?MREs?\b|military\s*rations?|전투\s*식량|엠알이/i,
 ];
 
 const SENSITIVE_PATTERNS = [
